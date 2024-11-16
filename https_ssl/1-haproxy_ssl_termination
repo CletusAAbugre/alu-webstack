@@ -33,21 +33,12 @@ defaults
     errorfile 503 /etc/haproxy/errors/503.http
     errorfile 504 /etc/haproxy/errors/504.http
 
-frontend clickviral-tech-frontend
-    bind *:80
-    bind *:443 ssl crt /etc/letsencrypt/live/www.cletusaabugre.tech/fullchain.pem key /etc/letsencrypt/live/www.cletusaabugre.tech/privkey.pem
-    acl path_acme_challenge path_beg /.well-known/acme-challenge/
-    use_backend acme_backend if path_acme_challenge
-    redirect scheme https code 301 if !{ ssl_fc }
-    default_backend clickviral-tech-backend
+frontend https_front
+    bind *:443 ssl crt /etc/ssl/private/www.cletusaabugre.tech.pem
+    acl is_https hdr(Host) -i www.cletusaabugre.tech
+    use_backend cletus-backend if is_https
 
-backend clickviral-tech-backend
+backend cletus-backend
     balance roundrobin
-    option httpchk GET /health-check
     server 6274-web-01 107.21.88.109:80 check
     server 6274-web-02 54.237.140.194:80 check
-
-backend acme_backend
-    server acme_server 127.0.0.1:80
-
-
